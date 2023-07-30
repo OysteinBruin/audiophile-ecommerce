@@ -1,0 +1,38 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebReactSPA", "Web\WebReactSPA\WebReactSPA.csproj", "{D5EC229D-4628-48DE-8D2B-AF1B890BD83A}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{D9F3A37F-AFB9-49D5-B078-77C7231C3786}"
+	ProjectSection(SolutionItems) = preProject
+		Directory.Packages.props = Directory.Packages.props
+		NuGet.config = NuGet.config
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{EF1C48B0-6376-4B61-A54C-6F17A9DD24F1}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{1586D01A-3A03-4649-BD38-612CE23E578F}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docker-compose", "docker-compose", "{5947936A-41D0-4334-AAEC-5087F4FC4980}"
+	ProjectSection(SolutionItems) = preProject
+		docker-compose.yml = docker-compose.yml
+		.dockerignore = .dockerignore
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Web Apps", "Web Apps", "{87614AEF-1E96-403C-847B-FC09BBA2B99D}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{D5EC229D-4628-48DE-8D2B-AF1B890BD83A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D5EC229D-4628-48DE-8D2B-AF1B890BD83A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D5EC229D-4628-48DE-8D2B-AF1B890BD83A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D5EC229D-4628-48DE-8D2B-AF1B890BD83A}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{87614AEF-1E96-403C-847B-FC09BBA2B99D} = {1586D01A-3A03-4649-BD38-612CE23E578F}
+		{D5EC229D-4628-48DE-8D2B-AF1B890BD83A} = {87614AEF-1E96-403C-847B-FC09BBA2B99D}
+	EndGlobalSection
+EndGlobal
