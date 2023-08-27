@@ -1,5 +1,6 @@
 ﻿using Identity.Server;
 using Serilog;
+using Serilog.Sinks.Elasticsearch;
 
 Log.Logger = new LoggerConfiguration()
     .WriteTo.Console()
@@ -10,28 +11,44 @@ Log.Information("Starting up");
 try
 {
     var builder = WebApplication.CreateBuilder(args);
-
-    builder.Host.UseSerilog((ctx, lc) => lc
-        .WriteTo.Console(
-            outputTemplate:
-            "[{Timestamp:HH:mm:ss} {Level}] {SourceContext}{NewLine}{Message:lj}{NewLine}{Exception}{NewLine}")
-        .Enrich.FromLogContext()
-        .ReadFrom.Configuration(ctx.Configuration));
+    
+    
+    string elasticUri = builder.Configuration["ElasticConfiguration:Uri"];
+    string appName = builder.Configuration["ApplicationName"];
+    Log.Information("Elastic Uri: {ElasticUri}, application name: {AppName}", elasticUri, appName);
+    builder.Logging.ClearProviders();
+    builder.Host.UseSerilog((context, services, configuration) =>
+    {
+        configuration
+            .Enrich.FromLogContext()
+            .Enrich.WithMachineName()
+            .WriteTo.Console(
+                outputTemplate:
+                "[{Timestamp:HH:mm:ss} {Level}] {SourceContext}{NewLine}{Message:lj}{NewLine}{Exception}{NewLine}")
+            .WriteTo.Elasticsearch(
+                new ElasticsearchSinkOptions(new Uri(elasticUri))    
+                {
+                    AutoRegisterTemplate = true,
+                    AutoRegisterTemplateVersion = AutoRegisterTemplateVersion.ESv7,
+                    IndexFormat = $"{appName}-logs-{context.HostingEnvironment.EnvironmentName?.ToLower().Replace(".", "-") ?? "development"}-{DateTime.UtcNow:yyyy-MM}",
+                    NumberOfShards = 2,
+                    NumberOfReplicas = 1
+                })
+            .Enrich.WithProperty("Environment", context.HostingEnvironment.EnvironmentName)
+            .ReadFrom.Configuration(context.Configuration);
+    });
 
     var app = builder
         .ConfigureServices()
         .ConfigurePipeline();
 
-    // this seeding is only for the template to bootstrap the DB and users.
-    // in production you will likely want a different approach.
-    if (args.Contains("/seed"))
-    {
-        Log.Information("Seeding database...");
-        SeedData.EnsureSeedData(app);
-        Log.Information("Done seeding database. Exiting.");
-        return;
-    }
-
+    // TODO: Apply database migration automatically. Note that this approach is not
+    // recommended for production scenarios. Consider generating SQL scripts from
+    // migrations instead.
+    Log.Information("Seeding database...");
+    SeedData.EnsureSeedData(app);
+    Log.Information("Done seeding database");
+        
     app.Run();
 }
 catch (Exception ex) when (

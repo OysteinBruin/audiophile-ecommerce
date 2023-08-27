@@ -1,5 +1,5 @@
 export const metadata = {
-    title: 'About Audiophile',
+    title: 'Audiophile - About',
 };
 
 const AboutPage = () => {

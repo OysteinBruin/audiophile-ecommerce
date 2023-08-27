@@ -1,15 +1,103 @@
 version: "3.7"
 
 services:
+  
+  sqldata:
+    image: mcr.microsoft.com/mssql/server:2019-latest
+    networks:
+      - audiophile-network
+    logging:
+      driver: none
+  
   webspa:
     image: web-client
     build:
-      context: ./Web/WebNextJsClient/
+      context: ./Web/WebViteJsClient
+      dockerfile: Dockerfile
     container_name: web-client
     restart: always
-    ports:
-      - "3000:3000"
+    networks:
+      - audiophile-network
+    
+  identity-server:
+    image: ${REGISTRY:-eshop}/identity.server:${PLATFORM:-linux}-${TAG:-latest}
+    build:
+      context: .
+      dockerfile: Services/Identity/Identity.Server/Dockerfile
+    depends_on:
+      - sqldata
+    networks:
+      - audiophile-network
+      
+  basket-api:
+    image: ${REGISTRY:-eshop}/basket.api:${PLATFORM:-linux}-${TAG:-latest}
+    build:
+      context: .
+      dockerfile: Services/Basket/Basket.API/Dockerfile
+    depends_on:
+      - identity-server
+#      - basketdata
+#      - identity-api
+#      - rabbitmq
+    networks:
+      - audiophile-network
+  
+  catalog-api:
+    image: ${REGISTRY:-eshop}/catalog.api:${PLATFORM:-linux}-${TAG:-latest}
+    build:
+      context: .
+      dockerfile: Services/Catalog/Catalog.API/Dockerfile
+    #depends_on:
+    #  - identity-server
+    #      - basketdata
+    #      - identity-api
+    #      - rabbitmq
+    networks:
+      - audiophile-network
+      - strapi
+       
+  strapi:
+    extends:
+      file: ./Web/WebStrapiCms/docker-compose.yml
+      service: strapi
+  
+  strapiDB:
+    extends:
+      file: ./Web/WebStrapiCms/docker-compose.yml
+      service: strapiDB
+      
+  strapiAdminer:  
+    extends:
+      file: ./Web/WebStrapiCms/docker-compose.yml
+      service: strapiAdminer
+  
+  es01:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.9.0
+    container_name: es01
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - data01:/usr/share/elasticsearch/data
+    networks:
+      - audiophile-network
+      
+  kib01:
+    image: docker.elastic.co/kibana/kibana:7.9.0
+    container_name: kib01
+    networks:
+      - audiophile-network
 
+networks:
+  audiophile-network:
+    driver: bridge
+  strapi:
+    driver: bridge
 
-
-
+volumes: 
+  data01:
+    driver: local
+  eshop-sqldata:
+    external: false
+  strapi-data:

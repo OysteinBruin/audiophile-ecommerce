@@ -1,0 +1,22 @@
+.dockerignore
+.git
+.gitignore
+.vs
+.vscode
+**/*.*proj.user
+**/azds.yaml
+**/bin
+**/charts
+**/Dockerfile
+**/Dockerfile.develop
+**/obj
+**/secrets.dev.yaml
+**/values.dev.yaml
+
+# Strapi
+**/.tmp/
+**/.cache/
+**/build/
+**/node_modules/
+**/data/
+

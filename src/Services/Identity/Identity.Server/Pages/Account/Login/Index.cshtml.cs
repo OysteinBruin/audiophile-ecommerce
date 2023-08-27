@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Serilog;
 
 namespace Identity.Server.Pages.Login;
 
@@ -21,6 +22,7 @@ public class Index : PageModel
     private readonly IEventService _events;
     private readonly IAuthenticationSchemeProvider _schemeProvider;
     private readonly IIdentityProviderStore _identityProviderStore;
+    private readonly Serilog.ILogger _logger;
 
     public ViewModel View { get; set; }
 
@@ -32,10 +34,12 @@ public class Index : PageModel
         IIdentityProviderStore identityProviderStore,
         IEventService events,
         UserManager<ApplicationUser> userManager,
-        SignInManager<ApplicationUser> signInManager)
+        SignInManager<ApplicationUser> signInManager,
+        Serilog.ILogger logger)
     {
         _userManager = userManager;
         _signInManager = signInManager;
+        _logger = logger;
         _interaction = interaction;
         _schemeProvider = schemeProvider;
         _identityProviderStore = identityProviderStore;
@@ -59,7 +63,7 @@ public class Index : PageModel
     {
         // check if we are in the context of an authorization request
         var context = await _interaction.GetAuthorizationContextAsync(Input.ReturnUrl);
-
+        _logger.Information("Login - OnPost");
         // the user clicked the "cancel" button
         if (Input.Button != "login")
         {
@@ -89,6 +93,7 @@ public class Index : PageModel
 
         if (ModelState.IsValid)
         {
+            _logger.Information("Login - OnPost - ModelState.IsValid - {Username}", Input.Username);
             var result = await _signInManager.PasswordSignInAsync(Input.Username, Input.Password, Input.RememberLogin,
                 lockoutOnFailure: true);
             if (result.Succeeded)
@@ -130,6 +135,8 @@ public class Index : PageModel
                 clientId: context?.Client.ClientId));
             ModelState.AddModelError(string.Empty, LoginOptions.InvalidCredentialsErrorMessage);
         }
+        
+        _logger.Information("Login - OnPost - Something went wrong");
 
         // something went wrong, show form with error
         await BuildModelAsync(Input.ReturnUrl);
